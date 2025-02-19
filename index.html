@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard with Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 20px;
+    }
+
+    .logo {
+      flex-shrink: 0;
+    }
+
+    #main-logo {
+      width: 100px;
+      height: auto;
+      border-radius: 10%;
+    }
+
+    .details {
+      margin-left: 20px;
+      flex-grow: 1;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+
+    p {
+      margin: 5px 0;
+      font-size: 1rem;
+    }
+
+    #map {
+      height: 70vh;
+      margin: 20px auto;
+      width: 90%;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <img src="images/Gemini_Generated_Image_q9l3ayq9l3ayq9l3.jpg" id="main-logo" alt="Website Logo">
+    </div>
+    <div class="details">
+      <h1>Welcome, <span id="user-name"></span></h1>
+      <p><strong>Vehicle Number:</strong> <span id="vehicle-no"></span></p>
+      <p><strong>Latitude:</strong> <span id="latitude"></span></p>
+      <p><strong>Longitude:</strong> <span id="longitude"></span></p>
+    </div>
+  </div>
+  <div id="map"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+  import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+  // Firebase Configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyBHkdIIHYJOr7ew3pVdXGkO_-c6wczQSfY",
+    authDomain: "live-tracking-83a64.firebaseapp.com",
+    databaseURL: "https://live-tracking-83a64-default-rtdb.firebaseio.com",
+    projectId: "live-tracking-83a64",
+    storageBucket: "live-tracking-83a64.appspot.com",
+    messagingSenderId: "613190605299",
+    appId: "1:613190605299:web:86b4910ca7cdba8b1d9a86",
+    measurementId: "G-CD7R4ZJZKV",
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const database = getDatabase(app);
+
+  // Reference HTML elements
+  const userNameSpan = document.getElementById("user-name");
+  const vehicleNoSpan = document.getElementById("vehicle-no");
+  const latitudeSpan = document.getElementById("latitude");
+  const longitudeSpan = document.getElementById("longitude");
+
+  // Initialize Leaflet map
+  const map = L.map("map").setView([20.5937, 78.9629], 5);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 18,
+  }).addTo(map);
+
+  const drawnItems = new L.FeatureGroup().addTo(map);
+  const drawControl = new L.Control.Draw({
+    edit: {
+      featureGroup: drawnItems,
+      remove: true,
+    },
+    draw: {
+      polygon: {
+        allowIntersection: false,
+        showArea: true,
+        shapeOptions: {
+          color: "blue",
+          weight: 3,
+          opacity: 0.5,
+        },
+      },
+      marker: false,
+      polyline: false,
+      circle: false,
+      circlemarker: false,
+      rectangle: false,
+    },
+  }).addTo(map);
+
+  let liveMarker;
+
+  // Listen for authentication state changes
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      const sanitizedUsername = user.displayName.replace(/[^a-zA-Z0-9]/g, "_");
+
+      // Real-time listener for geofences
+      const geofenceRef = ref(database, `users/${sanitizedUsername}/geofences`);
+      onValue(geofenceRef, (snapshot) => {
+        const geofenceData = snapshot.val();
+        drawnItems.clearLayers();
+
+        if (geofenceData) {
+          Object.entries(geofenceData).forEach(([key, geofence]) => {
+            const latLngs = geofence.map(coord => [parseFloat(coord.lat), parseFloat(coord.lng)]);
+            const polygon = L.polygon(latLngs, {
+              color: "blue",
+              weight: 3,
+              opacity: 0.5,
+            }).addTo(map);
+
+            polygon.geofenceKey = key; // Store Firebase key
+            drawnItems.addLayer(polygon);
+          });
+        }
+      });
+
+      // Real-time listener for user's live location
+      const locationRef = ref(database, `users/${sanitizedUsername}/currentLocation`);
+      onValue(locationRef, (snapshot) => {
+        const location = snapshot.val();
+        if (location) {
+          const { latitude, longitude } = location;
+
+          // Update UI with live location data
+          latitudeSpan.textContent = latitude || "Not available";
+          longitudeSpan.textContent = longitude || "Not available";
+
+          const lat = parseFloat(latitude);
+          const lng = parseFloat(longitude);
+
+          // Update marker position or create a new one
+          if (!liveMarker) {
+            liveMarker = L.marker([lat, lng]).addTo(map);
+          } else {
+            liveMarker.setLatLng([lat, lng]);
+          }
+
+          // Center the map on the updated location
+          map.setView([lat, lng], 12);
+
+          // Check if vehicle crossed geofence
+          checkIfVehicleCrossedGeofence(lat, lng);
+        }
+      });
+    } else {
+      // Redirect to login page if user is not authenticated
+      window.location.href = "registration.html";
+    }
+  });
+
+  // Save geofence to Firebase when a polygon is created
+  map.on("draw:created", (e) => {
+    const layer = e.layer;
+    drawnItems.addLayer(layer);
+
+    const latLngs = layer.getLatLngs()[0];
+    const user = auth.currentUser;
+
+    if (user) {
+      const sanitizedUsername = user.displayName.replace(/[^a-zA-Z0-9]/g, "_");
+      const geofenceRef = ref(database, `users/${sanitizedUsername}/geofences/${Date.now()}`);
+      const geofenceData = latLngs.map(latLng => ({
+        lat: latLng.lat.toFixed(4),
+        lng: latLng.lng.toFixed(4),
+      }));
+
+      set(geofenceRef, geofenceData);
+    }
+  });
+
+  // Remove geofence from Firebase when a polygon is deleted
+  map.on("draw:deleted", (e) => {
+    const user = auth.currentUser;
+    if (user) {
+      const sanitizedUsername = user.displayName.replace(/[^a-zA-Z0-9]/g, "_");
+      const layers = e.layers;
+
+      layers.eachLayer((layer) => {
+        if (layer.geofenceKey) {
+          const geofenceRef = ref(database, `users/${sanitizedUsername}/geofences/${layer.geofenceKey}`);
+          remove(geofenceRef);
+        }
+      });
+    }
+  });
+
+  // Check if the vehicle is inside or outside any geofence
+  function checkIfVehicleCrossedGeofence(lat, lng) {
+    const geofences = drawnItems.getLayers();
+
+    // If no geofences exist, don't trigger the alert
+    if (geofences.length === 0) {
+      return;
+    }
+
+    let isInsideAnyGeofence = false;
+
+    geofences.forEach((geofence) => {
+      if (geofence instanceof L.Polygon && geofence.getBounds().contains([lat, lng])) {
+        isInsideAnyGeofence = true;
+      }
+    });
+
+    if (!isInsideAnyGeofence) {
+      // Trigger alert with Leave and Report buttons
+      showAlertWithActions("Vehicle has crossed the geofence!");
+    }
+  }
+
+  // Function to display an alert with buttons
+  function showAlertWithActions(message) {
+    const alertBox = document.createElement("div");
+    alertBox.style.position = "fixed";
+    alertBox.style.top = "20px";
+    alertBox.style.right = "20px";
+    alertBox.style.backgroundColor = "#f8d7da";
+    alertBox.style.color = "#721c24";
+    alertBox.style.border = "1px solid #f5c6cb";
+    alertBox.style.borderRadius = "5px";
+    alertBox.style.padding = "20px";
+    alertBox.style.boxShadow = "0 4px 6px rgba(0, 0, 0, 0.1)";
+    alertBox.style.zIndex = "1000";
+
+    const alertMessage = document.createElement("p");
+    alertMessage.textContent = message;
+    alertMessage.style.margin = "0 0 10px";
+    alertBox.appendChild(alertMessage);
+
+    const leaveButton = document.createElement("button");
+    leaveButton.textContent = "Leave";
+    leaveButton.style.marginRight = "10px";
+    leaveButton.style.backgroundColor = "#007bff";
+    leaveButton.style.color = "#fff";
+    leaveButton.style.border = "none";
+    leaveButton.style.padding = "10px 15px";
+    leaveButton.style.borderRadius = "3px";
+    leaveButton.style.cursor = "pointer";
+
+    const reportButton = document.createElement("button");
+    reportButton.textContent = "Report";
+    reportButton.style.backgroundColor = "#dc3545";
+    reportButton.style.color = "#fff";
+    reportButton.style.border = "none";
+    reportButton.style.padding = "10px 15px";
+    reportButton.style.borderRadius = "3px";
+    reportButton.style.cursor = "pointer";
+
+    // Close alert on button click
+    leaveButton.addEventListener("click", () => alertBox.remove());
+    reportButton.addEventListener("click", () => {
+      alertBox.remove();
+      alert("Report has been sent.");
+    });
+
+    alertBox.appendChild(leaveButton);
+    alertBox.appendChild(reportButton);
+    document.body.appendChild(alertBox);
+  }
+</script>
+</body>
+</html>
