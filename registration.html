@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Montserrat:400,800');
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+    background: url('images/Gemini_Generated_Image_hfv2gshfv2gshfv2.jpg') no-repeat center center;
+    background-size: cover;  /* Ensures the background image covers the entire screen */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: 'Montserrat', sans-serif;
+    height: 90vh;
+}
+
+
+        h1 {
+            font-weight: bold;
+            margin: 0;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        p {
+            font-size: 14px;
+            font-weight: 100;
+            line-height: 20px;
+            letter-spacing: 0.5px;
+            margin: 20px 0 30px;
+        }
+
+        span {
+            font-size: 12px;
+        }
+
+        a {
+            color: #333;
+            font-size: 14px;
+            text-decoration: none;
+            margin: 15px 0;
+        }
+
+        button {
+            border-radius: 20px;
+            border: 1px solid #FF4B2B;
+            background-color: #FF4B2B;
+            color: #FFFFFF;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 12px 45px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: transform 80ms ease-in;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        button:focus {
+            outline: none;
+        }
+
+        button.ghost {
+            border-radius: 20px;
+            border: 1px solid #FF4B2B;
+            background-color: #FF4B2B;
+            color: #FFFFFF;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 12px 45px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: transform 80ms ease-in;
+        }
+
+        form {
+            background-color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 0 50px;
+            height: 100%;
+            text-align: center;
+        }
+
+        input {
+            background-color: #eee;
+            border: none;
+            padding: 12px 15px;
+            margin: 8px 0;
+            width: 100%;
+        }
+        .overlay-panel.overlay-left {
+        background-image: url('images/Gemini_Generated_Image_gp84ewgp84ewgp84.jpg'); /* Replace with the path to your image */
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    .overlay-panel.overlay-right {
+        background-image: url('images/Gemini_Generated_Image_q28n2iq28n2iq28n.jpg'); /* Replace with the path to your image */
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    /* Optional: Adjust text styles for better visibility over the images */
+    .overlay-panel h1, .overlay-panel p, .overlay-panel button {
+        color: #fff; /* Text color for better contrast */
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Add shadow for readability */
+    }
+        .error {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 14px 28px rgba(0,0,0,0.25), 
+                0 10px 10px rgba(0,0,0,0.22);
+            position: relative;
+            overflow: hidden;
+            width: 768px;
+            max-width: 100%;
+            min-height: 480px;
+        }
+
+        .form-container {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            transition: all 0.6s ease-in-out;
+        }
+
+        .sign-in-container {
+            left: 0;
+            width: 50%;
+            z-index: 2;
+        }
+
+        .container.right-panel-active .sign-in-container {
+            transform: translateX(100%);
+        }
+
+        .sign-up-container {
+            left: 0;
+            width: 50%;
+            opacity: 0;
+            z-index: 1;
+        }
+
+        .container.right-panel-active .sign-up-container {
+            transform: translateX(100%);
+            opacity: 1;
+            z-index: 5;
+            animation: show 0.6s;
+        }
+
+        @keyframes show {
+            0%, 49.99% {
+                opacity: 0;
+                z-index: 1;
+            }
+            
+            50%, 100% {
+                opacity: 1;
+                z-index: 5;
+            }
+        }
+
+        .overlay-container {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 50%;
+            height: 100%;
+            overflow: hidden;
+            transition: transform 0.6s ease-in-out;
+            z-index: 100;
+        }
+
+        .container.right-panel-active .overlay-container{
+            transform: translateX(-100%);
+        }
+
+        .overlay {
+            background: #FF416C;
+            background: -webkit-linear-gradient(to right, #FF4B2B, #FF416C);
+            background: linear-gradient(to right, #FF4B2B, #FF416C);
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: 0 0;
+            color: #FFFFFF;
+            position: relative;
+            left: -100%;
+            height: 100%;
+            width: 200%;
+            transform: translateX(0);
+            transition: transform 0.6s ease-in-out;
+        }
+
+        .container.right-panel-active .overlay {
+            transform: translateX(50%);
+        }
+
+        .overlay-panel {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 0 40px;
+            text-align: center;
+            top: 0;
+            height: 100%;
+            width: 50%;
+            transform: translateX(0);
+            transition: transform 0.6s ease-in-out;
+        }
+
+        .overlay-left {
+            padding-top: 300px;
+            transform: translateX(-20%);
+        }
+
+        .container.right-panel-active .overlay-left {
+            transform: translateX(0);
+        }
+
+        .overlay-right {
+            padding-top: 300px;
+            right: 0;
+            transform: translateX(0);
+        }
+
+        .container.right-panel-active .overlay-right {
+            transform: translateX(20%);
+        }
+        #main-logo {
+    width: 300px;
+    height: auto;
+}
+
+.logo {
+    border-radius: 10px;
+}
+
+
+    </style>
+<body>
+<img src="images/Screenshot 2025-01-27 140713.png" alt="Website Logo" class="logo" id="main-logo">
+
+<div class="container" id="container">
+    <div class="form-container sign-up-container">
+        <form id="signup-form">
+            <h1>Create Account</h1>
+            <input type="text" id="fullname" placeholder="Full Name" required />
+            <input type="email" id="mail" placeholder="Email" required />
+            <input type="text" pattern="[A-Za-z0-9]+" title="Only letters and numbers are allowed" id="vehicle-no" placeholder="Vehicle No." required />
+            <input type="password" id="password" placeholder="Password" required />
+            <input type="password" id="confirm-password" placeholder="Confirm Password" required />
+            <div id="error-message" class="error"></div>
+            <button type="submit" id="submit-btn">Sign Up</button>
+        </form>        
+    </div>
+    <div class="form-container sign-in-container">
+        <form id="signin-form">
+            <h1>Sign in</h1>
+            <input type="email" id="signin-email" placeholder="Email" required />
+            <input type="password" id="signin-password" placeholder="password" required />
+            <div id="signin-error-message" class="error"></div>
+            <button type="submit">Sign In</button>
+        </form>
+    </div>
+    
+    <div class="overlay-container">
+        <div class="overlay">
+            <div class="overlay-panel overlay-left">
+                <button class="ghost" id="signIn">Sign In</button>
+            </div>
+            <div class="overlay-panel overlay-right">
+                <button class="ghost" id="signUp">Sign Up</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { 
+      getAuth, 
+      createUserWithEmailAndPassword, 
+      signInWithEmailAndPassword, 
+      updateProfile 
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { 
+      getDatabase, 
+      ref, 
+      set, 
+      get 
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+  
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBHkdIIHYJOr7ew3pVdXGkO_-c6wczQSfY",
+      authDomain: "live-tracking-83a64.firebaseapp.com",
+      databaseURL: "https://live-tracking-83a64-default-rtdb.firebaseio.com",
+      projectId: "live-tracking-83a64",
+      storageBucket: "live-tracking-83a64.appspot.com",
+      messagingSenderId: "613190605299",
+      appId: "1:613190605299:web:86b4910ca7cdba8b1d9a86",
+      measurementId: "G-CD7R4ZJZKV",
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const database = getDatabase(app);
+  
+    // DOM Elements
+    const signUpButton = document.getElementById("signUp");
+    const signInButton = document.getElementById("signIn");
+    const container = document.getElementById("container");
+  
+    // Sign-Up Form Elements
+    const signupForm = document.getElementById("signup-form");
+    const passwordInput = document.getElementById("password");
+    const confirmPasswordInput = document.getElementById("confirm-password");
+    const errorMessage = document.getElementById("error-message");
+  
+    // Sign-In Form Elements
+    const signinForm = document.getElementById("signin-form");
+    const signinEmail = document.getElementById("signin-email");
+    const signinPassword = document.getElementById("signin-password");
+    const signinErrorMessage = document.getElementById("signin-error-message");
+  
+    // Toggle Between Panels
+    signUpButton.addEventListener("click", () => {
+      container.classList.add("right-panel-active");
+    });
+  
+    signInButton.addEventListener("click", () => {
+      container.classList.remove("right-panel-active");
+    });
+  
+    // Sign-Up Form Submission
+    signupForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+  
+      const fullName = document.getElementById("fullname").value.trim();
+      const email = document.getElementById("mail").value.trim();
+      const vehicleNo = document.getElementById("vehicle-no").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const confirmPassword = document.getElementById("confirm-password").value.trim();
+  
+      errorMessage.textContent = "";
+  
+      // Check if the passwords match
+      if (password !== confirmPassword) {
+        errorMessage.textContent = "Passwords do not match!";
+        return;
+      }
+  
+      // Check password length
+      if (password.length < 6) {
+        errorMessage.textContent = "Password must be at least 6 characters!";
+        return;
+      }
+  
+      try {
+        // Create a sanitized full name for the Firebase node
+        const sanitizedFullname = fullName.replace(/[^a-zA-Z0-9]/g, "_");
+  
+        // Reference to the username in Firebase Realtime Database
+        const userRef = ref(database, `users/${sanitizedFullname}`);
+  
+        // Check if the username already exists
+        const snapshot = await get(userRef);
+  
+        if (snapshot.exists()) {
+          errorMessage.textContent = "Username already exists. Please pick another one.";
+          return;
+        }
+  
+        // Create a new user with email and password
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  
+        await updateProfile(userCredential.user, { displayName: fullName });
+
+// Set the user data in Firebase, including a placeholder for geofence
+await set(userRef, {
+  vehicleNo: vehicleNo,
+  currentLocation: {
+    latitude: "",
+    longitude: ""
+  },
+});
+  
+        alert("Account created successfully!");
+        window.location.href = "registration.html"; // Redirect to the dashboard page after successful sign-up
+      } catch (error) {
+        // Handle errors during sign-up
+        errorMessage.textContent = error.message;
+      }
+    });
+  
+    // Sign-In Form Submission
+    signinForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+  
+      const email = signinEmail.value.trim();
+      const password = signinPassword.value.trim();
+  
+      signinErrorMessage.textContent = "";
+  
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        window.location.href = "index.html"; // Redirect to dashboard after successful login
+      } catch (error) {
+        signinErrorMessage.textContent = error.message;
+      }
+    });
+  </script>
+  
+</script>
+</body>
+</html>
