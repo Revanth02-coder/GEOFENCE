@@ -50,6 +50,33 @@
       border: 1px solid #ccc;
       border-radius: 10px;
     }
+    @media (max-width: 600px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .logo {
+    margin-bottom: 10px;
+  }
+
+  .details {
+    margin-left: 0;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+  }
+
+  p {
+    font-size: 0.9rem;
+  }
+
+  #map {
+    width: 95%;
+    height: 60vh;
+  }
+}
   </style>
 </head>
 <body>
@@ -287,9 +314,11 @@
     // Close alert on button click
     leaveButton.addEventListener("click", () => alertBox.remove());
     reportButton.addEventListener("click", () => {
-      alertBox.remove();
-      alert("Report has been sent.");
-    });
+  alertBox.remove();
+  alert("Report has been sent.");
+  window.location.href = "tel:100";
+});
+
 
     alertBox.appendChild(leaveButton);
     alertBox.appendChild(reportButton);
