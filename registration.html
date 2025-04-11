@@ -258,6 +258,86 @@
 .logo {
     border-radius: 10px;
 }
+/* ===================== Mobile View ===================== */
+@media (max-width: 600px) {
+  body {
+    height: auto;
+    padding: 20px 10px;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .container {
+    width: 100%;
+    min-height: 600px;
+    border-radius: 10px;
+  }
+
+  .form-container,
+  .sign-in-container,
+  .sign-up-container {
+    width: 100%;
+    position: relative;
+    transform: none !important;
+    opacity: 1 !important;
+    z-index: auto !important;
+    animation: none !important;
+  }
+
+  .overlay-container {
+    display: none; /* Hide overlay on mobile for simplicity */
+  }
+
+  form {
+    padding: 20px;
+    height: auto;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.2rem;
+  }
+
+  p, a, span {
+    font-size: 13px;
+  }
+
+  input {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  button {
+    padding: 10px 30px;
+    font-size: 12px;
+  }
+
+  .logo {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  #main-logo {
+    width: 150px;
+  }
+
+  .overlay-panel h1,
+  .overlay-panel p,
+  .overlay-panel button {
+    font-size: 14px;
+    text-align: center;
+    padding: 0 10px;
+  }
+
+  .overlay-left,
+  .overlay-right {
+    padding-top: 150px;
+  }
+}
 
 
     </style>
