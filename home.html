@@ -302,28 +302,70 @@
     leaveButton.style.borderRadius = "3px";
     leaveButton.style.cursor = "pointer";
 
-    const reportButton = document.createElement("button");
-    reportButton.textContent = "Report";
-    reportButton.style.backgroundColor = "#dc3545";
-    reportButton.style.color = "#fff";
-    reportButton.style.border = "none";
-    reportButton.style.padding = "10px 15px";
-    reportButton.style.borderRadius = "3px";
-    reportButton.style.cursor = "pointer";
+    <script>
+  const reportButton = document.createElement("button");
+  reportButton.textContent = "Report";
+  reportButton.style.backgroundColor = "#dc3545";
+  reportButton.style.color = "#fff";
+  reportButton.style.border = "none";
+  reportButton.style.padding = "10px 15px";
+  reportButton.style.borderRadius = "3px";
+  reportButton.style.cursor = "pointer";
 
-    // Close alert on button click
-    leaveButton.addEventListener("click", () => alertBox.remove());
-    reportButton.addEventListener("click", () => {
-  alertBox.remove();
-  alert("Report has been sent.");
-  window.location.href = "tel:100";
-});
+  const leaveButton = document.createElement("button");
+  leaveButton.textContent = "Leave";
+  leaveButton.style.marginRight = "10px";
+  leaveButton.style.padding = "10px 15px";
 
+  // Web Serial setup
+  let port;
+  let writer;
 
-    alertBox.appendChild(leaveButton);
-    alertBox.appendChild(reportButton);
-    document.body.appendChild(alertBox);
+  async function connectToArduino() {
+    try {
+      port = await navigator.serial.requestPort();
+      await port.open({ baudRate: 9600 });
+
+      const encoder = new TextEncoderStream();
+      encoder.readable.pipeTo(port.writable);
+      writer = encoder.writable.getWriter();
+      console.log("Connected to Arduino");
+    } catch (err) {
+      console.error("Serial connection failed:", err);
+    }
   }
+
+  leaveButton.addEventListener("click", () => alertBox.remove());
+
+  reportButton.addEventListener("click", async () => {
+    alertBox.remove();
+    alert("Report has been sent.");
+    window.location.href = "tel:100";
+
+    // Send "OFF" command to Arduino
+    if (!writer) {
+      await connectToArduino();
+    }
+    if (writer) {
+      await writer.write("OFF\n");
+      console.log("Sent OFF to Arduino");
+    }
+  });
+
+  const alertBox = document.createElement("div");
+  alertBox.style.position = "fixed";
+  alertBox.style.top = "20%";
+  alertBox.style.left = "50%";
+  alertBox.style.transform = "translateX(-50%)";
+  alertBox.style.background = "#fff";
+  alertBox.style.padding = "20px";
+  alertBox.style.border = "1px solid #ccc";
+  alertBox.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.2)";
+  alertBox.style.zIndex = "9999";
+
+  alertBox.appendChild(leaveButton);
+  alertBox.appendChild(reportButton);
+  document.body.appendChild(alertBox);
 </script>
 </body>
 </html>
